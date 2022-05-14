@@ -8,7 +8,7 @@ A simple Blender add-on to directly push 3D scene to Cloudinary Programmable Med
 - This Add-on
 - [Cloudinary Programmable Media](https://cloudinary.com/products/programmable_media) Account (free)
 
-![Cloudinary Exporter](https://github.com/tdatu/cloudinary_exporter/blob/main/media/demo.mp4?raw=true)
+[![Cloudinary Exporter](https://res.cloudinary.com/tdatupersonal/image/upload/v1652572300/blender/screenshot_mmcnpd.png)](https://github.com/tdatu/cloudinary_exporter/blob/main/media/demo.mp4?raw=true)
 
 ## Steps  
 1. Clone this repo: `git clone https://github.com/tdatu/cloudinary_exporter.git .`
