@@ -12,6 +12,7 @@ A simple Blender add-on to directly push 3D scene to Cloudinary Programmable Med
 
 https://user-images.githubusercontent.com/1905383/168451855-9c01b763-8cb9-4241-9afe-ca039b116ecc.mp4
 
+https://codesandbox.io/s/stoic-driscoll-m6lvgi
 
 ## Steps  
 1. Clone this repo: `git clone https://github.com/tdatu/cloudinary_exporter.git .`
