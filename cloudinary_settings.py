@@ -131,7 +131,7 @@ class CLOUDINARY_OT_operator(bpy.types.Operator):
         
         #Send the file
         sess = requests.Session()
-        
+        sess.headers.update({"User-Agent":"Blender-python/0.1.0"})
         res = sess.post(api_url, data=payload, files=files)
         
         #output return
