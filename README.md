@@ -23,7 +23,8 @@ https://codesandbox.io/s/stoic-driscoll-m6lvgi
 
 __Notes:__  
 * It only supports exporting glTF format. For more info about this format, go to: https://www.khronos.org/api/index_2017/gltf
-* Public ID only supports alphabet, integers, hypen, and underscore. 
+* Public ID only supports alphabet, integers, hypen, and underscore.
+* If the Cloudinary Panel **does not appear**, create the Cloudinary3D folder in ~/Documents
 
 
 ## TODO: 
