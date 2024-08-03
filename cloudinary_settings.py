@@ -223,8 +223,6 @@ def setup_storage_dir():
         result = True
     except FileExistsError:
         result = False
-    finally:
-        result = False
 
     return result
 
