@@ -3,6 +3,8 @@ import os
 import requests
 import shutil
 import configparser
+import random
+import string
 
 bl_info = {
     "name": "Cloudinary Uploader",
@@ -35,6 +37,8 @@ class CloudinaryProperty(bpy.types.PropertyGroup):
         description=
         "Public ID is the media asset identifier name in Cloudinary",
         maxlen=60)
+    file_types: bpy.props.EnumProperty(items=(('0', 'GLTZ', ''), ('1', 'USDZ',
+                                                                  '')))
     tags: bpy.props.StringProperty(name="Tags", maxlen=60)
 
 
@@ -49,22 +53,21 @@ class CLOUDINARY_PT_main_panel(bpy.types.Panel):
 
         layout = self.layout
         scene = context.scene
-        cld_prop = scene.cld_prop
 
         #load existing config
         config = self.load_config(context)
 
-        #cld_prop.api_key = config["CLOUDINARY"]["API_KEY"]
-        #cld_prop.cloud_name = config["CLOUDINARY"]["CLOUD_NAME"]
-        #cld_prop.upload_preset = config["CLOUDINARY"]["UPLOAD_PRESET"]
-
         #create fields to panel
-        layout.prop(cld_prop, "cloud_name")
-        layout.prop(cld_prop, "api_key")
-        layout.prop(cld_prop, "upload_preset")
-        layout.prop(cld_prop, "public_id")
-        layout.prop(cld_prop, "tags")
+        layout.prop(scene.cld_prop, "cloud_name")
+        layout.prop(scene.cld_prop, "api_key")
+        layout.prop(scene.cld_prop, "upload_preset")
+        layout.prop(scene.cld_prop, "public_id")
+        layout.prop(scene.cld_prop, "tags")
 
+        layout.label(text="Select file type")
+        layout.prop(scene.cld_prop, "file_types", expand=True)
+
+        layout.operator("cloudinaryconfig.oper")
         layout.operator("cloudinary.oper")
 
     def load_config(self, context):
@@ -77,11 +80,40 @@ class CLOUDINARY_PT_main_panel(bpy.types.Panel):
         config = configparser.ConfigParser()
         config.read(".ini")
 
-        #self.report({"INFO"}, "API KEY: {}".format(config["CLOUDINARY"]["API_KEY"]))
+        #context.scene.cld_prop.api_key = config["CLOUDINARY"]["API_KEY"]
+        #context.scene.cld_prop.cloud_name = config["CLOUDINARY"]["CLOUD_NAME"]
+        #context.scene.cld_prop.upload_preset = config["CLOUDINARY"]["UPLOAD_PRESET"]
 
         os.chdir(root)
 
         return config
+
+
+class CLOUDINARYCONFIG_OT_operator(bpy.types.Operator):
+
+    bl_label = "Load Config"
+    bl_idname = "cloudinaryconfig.oper"
+
+    def execute(self, context):
+        #Go to storate dir
+        root = os.getcwd()
+        storage_dir = os.path.expanduser(
+            "~") + os.sep + "Documents" + os.sep + "Cloudinary3D"
+        os.chdir(storage_dir)
+
+        if os.path.exists(".ini"):
+            config = configparser.ConfigParser()
+            config.read(".ini")
+
+            context.scene.cld_prop.api_key = config["CLOUDINARY"]["API_KEY"]
+            context.scene.cld_prop.cloud_name = config["CLOUDINARY"][
+                "CLOUD_NAME"]
+            context.scene.cld_prop.upload_preset = config["CLOUDINARY"][
+                "UPLOAD_PRESET"]
+
+        os.chdir(root)
+
+        return {"FINISHED"}
 
 
 class CLOUDINARY_OT_operator(bpy.types.Operator):
@@ -120,7 +152,10 @@ class CLOUDINARY_OT_operator(bpy.types.Operator):
         os.chdir(dest)
         os.chdir("..")
 
-        zipfile = "{}.zip".format(cld_prop.public_id)
+        if int(cld_prop.file_types) == 0:
+            zipfile = "{}.zip".format(cld_prop.public_id)
+        else:
+            zipfile = "{}.usdz".format(cld_prop.public_id)
 
         payload = {}
         files = [('file', ('file', open(zipfile,
@@ -163,11 +198,13 @@ class CLOUDINARY_OT_operator(bpy.types.Operator):
 
         cloud_name = cld_prop.cloud_name
         upload_preset = cld_prop.upload_preset
-        public_id = cld_prop.public_id
-
-        self.report({"INFO"}, "cloud name: {}".format(cloud_name))
-        self.report({"INFO"}, "upload preset: {}".format(upload_preset))
-        self.report({"INFO"}, "public id: {}".format(public_id))
+        if len(cld_prop.public_id) > 0:
+            public_id = cld_prop.public_id
+        else:
+            public_id = ''.join(
+                random.choices(string.ascii_lowercase + string.digits, k=12))
+            context.scene.cld_prop.public_id = public_id
+            cld_prop.public_id = public_id
 
         check = 0
 
@@ -180,8 +217,6 @@ class CLOUDINARY_OT_operator(bpy.types.Operator):
         if len(public_id) > 2:
             check += 1
 
-        self.report({"INFO"}, "check value: {}".format(check))
-
         #export the scene
         if check == 3:
             home_dir = os.path.expanduser('~')
@@ -193,12 +228,16 @@ class CLOUDINARY_OT_operator(bpy.types.Operator):
                 #create the destination folder
                 os.makedirs(dest)
 
-            bpy.ops.export_scene.gltf("EXEC_DEFAULT",
-                                      filepath=export_file,
-                                      export_format="GLTF_SEPARATE")
-
-            #zip directory
-            self.zip_dir(dest, public_id)
+            if int(cld_prop.file_types) == 0:
+                bpy.ops.export_scene.gltf("EXEC_DEFAULT",
+                                          filepath=export_file,
+                                          export_format="GLTF_SEPARATE")
+                #zip directory
+                self.zip_dir(dest, public_id)
+            else:
+                bpy.ops.wm.usd_export(filepath=export_file + ".usdz",
+                                      check_existing=True)
+                os.rename(export_file + ".usdz", dest + ".usdz")
 
             #upload file
             self.upload(dest, cld_prop)
@@ -210,7 +249,8 @@ class CLOUDINARY_OT_operator(bpy.types.Operator):
 
 
 classes = [
-    CloudinaryProperty, CLOUDINARY_PT_main_panel, CLOUDINARY_OT_operator
+    CloudinaryProperty, CLOUDINARY_PT_main_panel, CLOUDINARY_OT_operator,
+    CLOUDINARYCONFIG_OT_operator
 ]
 
 
@@ -243,7 +283,7 @@ def register():
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
-        del bpy.types.Scene.cld_prop
+        #del bpy.types.Scene.cld_prop
 
 
 if __name__ == "__main__":
