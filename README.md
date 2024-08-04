@@ -27,7 +27,17 @@ __Notes:__
 * If the Cloudinary Panel **does not appear**, create the Cloudinary3D folder in ~/Documents
 
 
+## New Features
+1. Load previous config.  Useful especially when closing Blender so no
+   need to type all of the needed environment variables. 
+2. In addition to default GLTZ, USDZ 3D file format is now added. 
+3. Allow blank Public ID field and it will generate a random
+  12 alpha-numeric characters. 
+
+
 ## TODO: 
 1. Support forward slash character in the Public ID field.  
-2. Persist config, reload config.  
+2. ~~Persist config, reload config.~~  
+
+
 
